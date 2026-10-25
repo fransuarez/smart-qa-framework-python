@@ -3,71 +3,105 @@
 **Repository name:** `smart-qa-framework-python`
 
 **Target applications:**
-
-- **UI target:** [SauceDemo](https://www.saucedemo.com/) — test e-commerce application
+- **UI target:** [SauceDemo](https://www.saucedemo.com/) — test e‑commerce application
 - **API target:** [Fake Store API](https://fakestoreapi.com/) — REST API with JWT authentication and CRUD operations (*)
 
-## Technology stack (100% free)
+## Technology stack (100 % free)
 
-- **Language and BDD:** Python 3.11+ / `behave`
-- **HTTP/API layer:** `requests` / `pydantic` for JSON schema validation
-- **UI layer:** Playwright or Selenium
-- **AI module 1 — Visual AI:** Applitools Eyes (*Free Starter Plan*)
-- **AI module 2 — Self-healing:** Healenium (via Docker) or AI-assisted alternative locator strategies
-- **AI module 3 — Data generation:** Google Gemini API / OpenAI API (free tiers)
-- **CI/CD and reports:** GitHub Actions + Allure Reports / GitHub Pages
+| Layer | Technology |
+|-------|------------|
+| **Language / BDD** | Python 3.11+, `behave` |
+| **HTTP / API** | `requests`, `pydantic` (JSON schema validation) |
+| **UI** | Playwright **or** Selenium (choose based on team preference) |
+| **Visual AI** | Applitools Eyes (Free Starter Plan) |
+| **Self‑healing** | Healenium (Docker) **or** custom locator‑fallback logic |
+| **Data generation** | Google Gemini API / OpenAI API (free tiers) |
+| **CI/CD & reports** | GitHub Actions, Allure Reports, GitHub Pages |
 
-## Implementation plan by phase
+---
 
-### Phase 1: Architecture and backend (API) layer
+## Implementation Plan by Phase
 
-- **Goal:** Create the Python HTTP client and configure BDD for the backend.
-- **Deliverables:**
-  1. Create `features/api_products.feature` with Gherkin BDD scenarios for creating and retrieving products, and authenticating users in the *Fake Store API*.
-  2. Implement `utils/api_client.py`, a Python module using `requests` to handle GET, POST, PUT, and DELETE requests, as well as JWT tokens.
-  3. Add JSON schema validation with `pydantic` to ensure backend data integrity.
+### Phase 1 – Architecture & API Layer (≈ 1 week)
 
-### Phase 2: Frontend (UI) layer and Page Object Model
+| Goal | Create a robust, reusable HTTP client and BDD scaffolding for the Fake Store API |
+|------|-----------------------------------------------------------------------------------|
+| **Deliverables** | 1. `features/api_products.feature` – Gherkin scenarios for **auth**, **create**, **read**, **update**, **delete** product endpoints. <br>2. `utils/api_client.py` – Wrapper around `requests` handling: <br> • Base URL & session <br> • JWT acquisition & auto‑refresh <br> • Generic `get/post/put/delete` helpers <br> • Error handling & logging <br>3. `utils/pydantic_models.py` – `Product`, `User`, `AuthResponse` schemas for request/response validation. |
+| **Estimated effort** | 2 days – design & skeleton <br>2 days – implementation & unit tests <br>1 day – integrate with `behave` steps |
+| **Milestones** | ✅ API client ready <br>✅ First BDD scenarios pass locally |
 
-- **Goal:** Automate the web interface using the Page Object Model (POM) design pattern.
-- **Deliverables:**
-  1. Create `pages/login_page.py` and `pages/inventory_page.py` to map the elements on *SauceDemo*.
-  2. Create `features/ui_checkout.feature` to automate login, item filtering, the cart, and checkout.
+---
 
-### Phase 3: Integrate the AI layer
+### Phase 2 – UI Layer & Page‑Object Model (≈ 1 week)
 
-#### 1. LLM data generator (`utils/ai_data_generator.py`)
+| Goal | Automate SauceDemo UI using a clean POM architecture |
+|------|--------------------------------------------------------|
+| **Deliverables** | 1. `pages/login_page.py` – elements & actions (`login(username, password)`). <br>2. `pages/inventory_page.py` – methods to filter, add‑to‑cart, navigate to checkout. <br>3. `features/ui_checkout.feature` – BDD flow: login → filter → add item → checkout → order confirmation. |
+| **Estimated effort** | 1 day – POM scaffolding <br>2 days – implement page methods <br>2 days – BDD steps & first test run <br>1 day – tweak selectors, add basic assertions |
+| **Milestones** | ✅ UI tests run end‑to‑end with Playwright/Selenium <br>✅ Allure report generated locally |
 
-Use the Gemini API or another LLM to dynamically generate realistic product payloads or user data, including edge cases, instead of relying on hardcoded data.
+---
 
-#### 2. Visual AI module with Applitools (`utils/visual_ai.py`)
+### Phase 3 – AI Layer Integration (≈ 1‑2 weeks)
 
-- Integrate Applitools Eyes into the *SauceDemo* checkout test.
-- Configure a full UI check (`eyes.check("Checkout Page")`) to demonstrate how AI can detect layout shifts or visual defects that traditional assertions might miss.
+| Sub‑module | Description | Key Files | Rough effort |
+|------------|-------------|-----------|--------------|
+| **LLM Data Generator** | Use Gemini/OpenAI to produce realistic product payloads (including edge‑case values). | `utils/ai_data_generator.py` | 2 days (API wrapper + prompt library) |
+| **Visual AI (Applitools)** | Add Applitools Eyes visual checks to the checkout page. | `utils/visual_ai.py` (Eyes init, `check_checkout()`) | 2 days (setup, API key handling, first visual test) |
+| **Self‑healing (Healenium)** | Spin up Healenium Docker, integrate with Selenium/Playwright driver. Provide fallback locators when elements shift. | `utils/self_healing.py` (driver wrapper) | 3 days (Docker compose, driver patch, demo scenario) |
 
-#### 3. Self-healing module
+**Outcome:** A single BDD scenario will demonstrate: <br>1️⃣ LLM‑generated payload → API POST → schema validation <br>2️⃣ UI login → add known item → checkout → visual AI validation <br>*(No cross‑system data coupling is claimed.)*
 
-Configure Healenium in the project so that UI tests can tolerate DOM attribute changes at runtime.
+---
 
-### Phase 4: Orchestrated API and UI Demo
+### Phase 4 – Orchestrated API + UI Demo (≈ 2 days)
 
-- **Goal:** Demonstrate API testing, UI testing, and visual AI in one BDD scenario without implying that Fake Store API data appears in SauceDemo.
-- **Flow:**
-  1. `Given`: The LLM generates a valid product payload.
-  2. `When`: The test sends the payload to Fake Store API with a POST request.
-  3. `Then`: Validate the response against the product schema and check the returned fields. Treat the write as simulated; do not assume it persists.
-  4. `When`: The test independently logs in to SauceDemo and adds a known inventory item to the cart.
-  5. `Then`: Validate the SauceDemo checkout flow and use Applitools to check the final UI screen.
-- **Note:** The API product and SauceDemo inventory item are separate test data. No assertion should claim that the API-created product appears in SauceDemo.
+| Goal | Combine the three layers into one end‑to‑end BDD story |
+|------|-------------------------------------------------------|
+| **Feature** | `features/full_flow.feature` – “Generate product → POST to API → Validate → UI checkout → Visual AI check”. |
+| **Steps** | - `given` LLM generates payload <br>- `when` API POST executed <br>- `then` response matches `Product` schema <br>- `when` UI login & cart actions <br>- `then` checkout succeeds <br>- `and` Applitools visual check passes |
+| **Verification** | Run locally, view Allure + Applitools dashboards, capture screenshots for README. |
 
-### Phase 5: GitHub Actions CI/CD pipeline and documentation
+---
 
-- **Goal:** Set up continuous automation and prepare the project for an interview.
-- **Deliverables:**
-  1. `.github/workflows/test-pipeline.yml`: A pipeline that installs dependencies, runs `behave`, and generates the report.
-  2. A professional `README.md` containing:
-     - A framework architecture diagram using Mermaid.js.
-     - GitHub Actions build badges.
-     - A clear explanation of why and how AI was applied in the project.
-     - Screenshots showing the Applitools / Healenium dashboards in action.
+### Phase 5 – CI/CD, Documentation & Polish (≈ 1 week)
 
+| Deliverable | Details |
+|-------------|---------|
+| **GitHub Actions** | `.github/workflows/test-pipeline.yml` – steps: <br>1️⃣ Checkout <br>2️⃣ Setup Python 3.11 <br>3️⃣ Install `requirements-dev.txt` <br>4️⃣ Export secrets (`APPLITOOLS_API_KEY`, `GEMINI_API_KEY`) <br>5️⃣ Run `behave -f allure_behave.formatter:AllureFormatter -o allure-results` <br>6️⃣ Publish Allure report as GitHub Pages artifact. |
+| **README.md** | - Project overview <br>- Architecture diagram (Mermaid) <br>- Badges for CI status & coverage <br>- How AI is used (LLM data, visual AI, self‑healing) <br>- Screenshots of Applitools & Healenium dashboards <br>- Quick‑start instructions (env file, Docker compose for Healenium). |
+| **Documentation** | Update `docs/` with: <br>- `setup.md` (environment & Docker) <br>- `ai-modules.md` (prompt examples, API usage). |
+| **Testing** | Add unit tests under `tests/unit/` for: <br>- `api_client` (mocked requests) <br>- `ai_data_generator` (prompt validation) <br>- `visual_ai` (mock Eyes). |
+| **Timeline** | Day 1‑2: CI pipeline + README skeleton <br>Day 3‑4: Add diagrams & screenshots <br>Day 5: Final sanity run, bug‑fixes, push to `main`. |
+
+---
+
+## Project Structure (unchanged)
+
+```
+smart-qa-framework-python/
+├── .github/
+│   └── workflows/
+│       └── test-pipeline.yml
+├── docs/
+│   └── project-plan.md
+├── features/
+│   ├── api_products.feature
+│   ├── ui_checkout.feature
+│   └── steps/
+│       ├── api_steps.py
+│       └── ui_steps.py
+├── pages/
+│   ├── login_page.py
+│   └── inventory_page.py
+├── utils/
+│   ├── api_client.py
+│   ├── ai_data_generator.py
+│   ├── visual_ai.py
+│   └── self_healing.py   # (new)
+├── tests/
+│   └── unit/
+├── requirements.txt
+├── requirements-dev.txt
+├── .env.example
+└── README.md
