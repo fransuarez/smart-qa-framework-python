@@ -1,0 +1,20 @@
+# BDD & Framework Core
+behave>=1.2.6
+pytest>=8.0.0
+
+# HTTP & API Testing
+requests>=2.31.0
+pydantic>=2.6.0
+
+# UI Automation (Playwright es más moderno, rápido y nativo que Selenium)
+playwright>=1.41.0
+
+# Visual AI Testing
+eyes-playwright>=5.0.0
+
+# Integración con LLM (Gemini API para datos dinámicos)
+google-genai>=0.1.0
+
+# Utilidades
+python-dotenv>=1.0.0
+allure-behave>=2.13.0
