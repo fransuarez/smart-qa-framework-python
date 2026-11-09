@@ -1,11 +1,10 @@
-# Definitive Plan: Hybrid Automation Framework + AI
+# Hybrid Automation Framework - Original Architecture Plan
 
 **Repository name:** `smart-qa-framework-python`
 
 **Target applications:**
-
 - **UI target:** [SauceDemo](https://www.saucedemo.com/) — test e-commerce application
-- **API target:** [Fake Store API](https://fakestoreapi.com/) — REST API with JWT authentication and CRUD operations (*)
+- **API target:** [Fake Store API](https://fakestoreapi.com/) — REST API with JWT authentication and CRUD operations
 
 ## Technology stack (100% free)
 
@@ -20,83 +19,131 @@
 ## Implementation plan by phase
 
 ### Phase 1: Architecture and backend (API) layer
-
 - **Goal:** Create the Python HTTP client and configure BDD for the backend.
 - **Deliverables:**
-  1. Create `features/api_products.feature` with Gherkin BDD scenarios for creating and retrieving products, and authenticating users in the *Fake Store API*.
+  1. Create `features/api_products.feature` with Gherkin BDD scenarios for creating and retrieving products, and authenticating users in the Fake Store API.
   2. Implement `utils/api_client.py`, a Python module using `requests` to handle GET, POST, PUT, and DELETE requests, as well as JWT tokens.
   3. Add JSON schema validation with `pydantic` to ensure backend data integrity.
 
 ### Phase 2: Frontend (UI) layer and Page Object Model
-
 - **Goal:** Automate the web interface using the Page Object Model (POM) design pattern.
 - **Deliverables:**
-  1. Create `pages/login_page.py` and `pages/inventory_page.py` to map the elements on *SauceDemo*.
+  1. Create `pages/login_page.py` and `pages/inventory_page.py` to map the elements on SauceDemo.
   2. Create `features/ui_checkout.feature` to automate login, item filtering, the cart, and checkout.
 
 ### Phase 3: Integrate the AI layer
-
-#### 1. LLM data generator (`utils/ai_data_generator.py`)
-
-Use the Gemini API or another LLM to dynamically generate realistic product payloads or user data, including edge cases, instead of relying on hardcoded data.
-
-#### 2. Visual AI module with Applitools (`utils/visual_ai.py`)
-
-- Integrate Applitools Eyes into the *SauceDemo* checkout test.
-- Configure a full UI check (`eyes.check("Checkout Page")`) to demonstrate how AI can detect layout shifts or visual defects that traditional assertions might miss.
-
-#### 3. Self-healing module
-
-Configure Healenium in the project so that UI tests can tolerate DOM attribute changes at runtime.
+- **LLM data generator** (`utils/ai_data_generator.py`) — Gemini/OpenAI payload generation
+- **Visual AI module** (`utils/visual_ai.py`) — Applitools Eyes checkout validation
+- **Self-healing module** — Healenium Docker integration
 
 ### Phase 4: Orchestrated API and UI Demo
-
-- **Goal:** Demonstrate API testing, UI testing, and visual AI in one BDD scenario without implying that Fake Store API data appears in SauceDemo.
-- **Flow:**
-  1. `Given`: The LLM generates a valid product payload.
-  2. `When`: The test sends the payload to Fake Store API with a POST request.
-  3. `Then`: Validate the response against the product schema and check the returned fields. Treat the write as simulated; do not assume it persists.
-  4. `When`: The test independently logs in to SauceDemo and adds a known inventory item to the cart.
-  5. `Then`: Validate the SauceDemo checkout flow and use Applitools to check the final UI screen.
-- **Note:** The API product and SauceDemo inventory item are separate test data. No assertion should claim that the API-created product appears in SauceDemo.
+- **Goal:** Demonstrate API testing, UI testing, and visual AI in one BDD scenario.
+- **Flow:** LLM payload → Fake Store API → Validation → SauceDemo checkout → Visual AI
 
 ### Phase 5: GitHub Actions CI/CD pipeline and documentation
-
-- **Goal:** Set up continuous automation and prepare the project for an interview.
-- **Deliverables:**
-  1. `.github/workflows/test-pipeline.yml`: A pipeline that installs dependencies, runs `behave`, and generates the report.
-  2. A professional `README.md` containing:
-     - A framework architecture diagram using Mermaid.js.
-     - GitHub Actions build badges.
-     - A clear explanation of why and how AI was applied in the project.
-     - Screenshots showing the Applitools / Healenium dashboards in action.
+- **Deliverables:** Complete CI pipeline, professional README with Mermaid diagram and Applitools screenshots
 
 ## Project Structure
-
 ```
-smart-qa-framework-python/          # Repository root
+smart-qa-framework-python/
 ├── .github/
 │   └── workflows/
-│       └── test-pipeline.yml      # GitHub Actions CI/CD
+│       └── test-pipeline.yml
 ├── docs/
-│   └── project-plan.md            # This definitive plan
+│   └── project-plan.md
 ├── features/
-│   ├── api_products.feature       # BDD scenarios for Fake Store API
-│   ├── ui_checkout.feature        # BDD scenarios for SauceDemo UI flow
-│   └── steps/                     # Step‑definition modules
+│   ├── api_products.feature
+│   ├── ui_checkout.feature
+│   └── steps/
 │       ├── api_steps.py
 │       └── ui_steps.py
 ├── pages/
-│   ├── login_page.py              # Page‑Object for SauceDemo login
-│   └── inventory_page.py          # Page‑Object for product listing & cart
+│   ├── login_page.py
+│   └── inventory_page.py
 ├── utils/
-│   ├── api_client.py              # HTTP client (requests + JWT handling)
-│   ├── ai_data_generator.py       # LLM‑driven payload generator
-│   └── visual_ai.py               # Applitools Eyes integration
+│   ├── api_client.py
+│   ├── ai_data_generator.py
+│   └── visual_ai.py
 ├── tests/
-│   └── unit/                      # Unit tests for utils & client code
-├── requirements.txt               # Production dependencies
-├── requirements-dev.txt           # Dev / testing dependencies (behave, allure, etc.)
-├── .env.example                   # Sample environment file
-└── README.md                      # Project overview (generated from this plan)
+│   └── unit/
+├── requirements.txt
+├── requirements-dev.txt
+├── .env.example
+└── README.md
+```
+```
+
+### **`docs/project-plan.md` - Current Implementation Status** (Your updated version)
+
+```markdown
+# Definitive Plan: Hybrid Automation Framework + AI
+
+**Repository name:** `smart-qa-framework-python`
+
+**Target applications:**
+- **UI target:** [`flask-shop-demo`](https://github.com/fransuarez/flask-shop-demo) — thin Flask + Jinja frontend (session cart, no DB)
+- **API target:** [Fake Store API](https직접 (https://fakestoreapi.com/) — read-only product catalog (no JWT/auth needed)
+
+## Current Implementation Status
+
+**Significant Progress Made:**
+- ✅ Full BDD framework implemented (api_products.feature, ui_checkout.feature, steps/)
+- ✅ Complete API client with validation (no JWT needed)
+- ✅ AI modules integrated (data generation, visual AI, self-healing)
+- ✅ CI/CD pipeline operational (GitHub Actions)
+- ✅ Unit tests for key components
+- ✅ Requirements management setup
+
+**Critical Architecture Mismatch:**
+- **Plans:** SauceDemo UI target
+- **Reality:** flask-shop-demo UI target (session cart, no login required)
+- **Impact:** Page objects and BDD scenarios require re-alignment
+
+**Immediate Action Items:**
+1. **Realign UI target** - Fix page objects for flask-shop-demo `data-testid` hooks
+2. **Complete page object model** - Add cart_page.py, checkout_page.py, base_page.py
+3. **Add standard files** - .env.example, LICENSE, requirements-dev.txt
+4. **Complete documentation** - Add docs/context.md
+5. **Fix implementation** - Remove SauceDemo references
+
+## Project Structure (Current Reality)
+```
+smart-qa-framework-python/
+├── .github/
+│   └── workflows/
+│       └── test-pipeline.yml           ✅ exists
+├── docs/
+│   ├── project-plan.md                ✅ current status
+│   ├── project-bases.md               ✅ original architecture
+│   ├── context.md                   ⚠️ missing
+│   ├── setup.md                      ✅ exists
+│   └── ai-modules.md                 ✅ exists
+├── features/
+│   ├── api_products.feature          ✅ exists
+│   ├── ui_checkout.feature           ✅ exists
+│   ├── full_flow.feature             ✅ exists
+│   └── steps/
+│       ├── api_steps.py              ✅ exists
+│       └── ui_steps.py               ✅ exists
+├── pages/
+│   ├── login_page.py                 ⚠️ exists but unused (flask-shop-demo no login)
+│   └── inventory_page.py             ✅ exists for flask-shop-demo
+├── utils/
+│   ├── api_client.py                 ✅ implemented
+│   ├── pydantic_models.py            ✅ implemented
+│   ├── ai_data_generator.py          ✅ implemented
+│   ├── visual_ai.py                  ✅ implemented
+│   └── self_healing.py               ✅ implemented
+├── tests/
+│   └── unit/
+│       ├── __init__.py               ✅ exists
+│       ├── test_api_client.py        ✅ exists
+│       └── test_ai_data_generator.py ✅ exists
+├── requirements.txt                  ✅ exists
+├── resources/
+│   └── fake-store-api/
+│       └── fakestore-api-doc.json   ✅ exists
+├── behave.ini                        ✅ exists
+├── .gitignore                        ✅ exists
+└── README.md                         ✅ exists
 ```

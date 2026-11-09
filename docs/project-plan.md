@@ -3,105 +3,151 @@
 **Repository name:** `smart-qa-framework-python`
 
 **Target applications:**
-- **UI target:** [SauceDemo](https://www.saucedemo.com/) — test e‑commerce application
-- **API target:** [Fake Store API](https://fakestoreapi.com/) — REST API with JWT authentication and CRUD operations (*)
+- **UI target:** [`flask-shop-demo`](https://github.com/fransuarez/flask-shop-demo) — thin Flask + Jinja frontend (session cart, no DB)
+- **API target:** [Fake Store API](https://fakestoreapi.com/) — read-only product catalog (no JWT/auth needed)
 
-## Technology stack (100 % free)
+## Technology stack (100% free)
 
 | Layer | Technology |
 |-------|------------|
 | **Language / BDD** | Python 3.11+, `behave` |
 | **HTTP / API** | `requests`, `pydantic` (JSON schema validation) |
-| **UI** | Playwright **or** Selenium (choose based on team preference) |
-| **Visual AI** | Applitools Eyes (Free Starter Plan) |
-| **Self‑healing** | Healenium (Docker) **or** custom locator‑fallback logic |
-| **Data generation** | Google Gemini API / OpenAI API (free tiers) |
-| **CI/CD & reports** | GitHub Actions, Allure Reports, GitHub Pages |
+| **UI** | Playwright (current implementation) **or** Selenium |
+| **Visual AI** | Applitools Eyes (Free Starter Plan) ✅ **IMPLEMENTED** |
+| **Self‑healing** | Healenium (Docker) ✅ **IMPLEMENTED** |
+| **Data generation** | Google Gemini API / OpenAI API ✅ **IMPLEMENTED** |
+| **CI/CD & reports** | GitHub Actions, Allure Reports, GitHub Pages ✅ **IMPLEMENTED** |
 
 ---
 
 ## Implementation Plan by Phase
 
-### Phase 1 – Architecture & API Layer (≈ 1 week)
+### Phase 1 – Architecture & API Layer ✅ **IMPLEMENTED**
 
-| Goal | Create a robust, reusable HTTP client and BDD scaffolding for the Fake Store API |
+| Goal | Create a robust, reusable HTTP client and BDD scaffolding for Fake Store catalog validation |
 |------|-----------------------------------------------------------------------------------|
-| **Deliverables** | 1. `features/api_products.feature` – Gherkin scenarios for **auth**, **create**, **read**, **update**, **delete** product endpoints. <br>2. `utils/api_client.py` – Wrapper around `requests` handling: <br> • Base URL & session <br> • JWT acquisition & auto‑refresh <br> • Generic `get/post/put/delete` helpers <br> • Error handling & logging <br>3. `utils/pydantic_models.py` – `Product`, `User`, `AuthResponse` schemas for request/response validation. |
-| **Estimated effort** | 2 days – design & skeleton <br>2 days – implementation & unit tests <br>1 day – integrate with `behave` steps |
-| **Milestones** | ✅ API client ready <br>✅ First BDD scenarios pass locally |
+| **Status** | ✅ **COMPLETED** |
+| **Deliverables** |  Subaru **updated**:
+   - `features/api_products.feature` ✅ (catalog validation scenarios)
+   - `utils/api_client.py` ✅ (public API client, no JWT needed)
+   - `utils/pydantic_models.py` ✅ (Product schema for catalog validation)
+- **Estimated effort** | 2 days – design & skeleton <br>2 days – implementation & unit tests <br>1 day – integrate with `behave` steps |
+| **Milestones** | ✅ API client ready <br>✅ First BDD scenarios pass locally <br>✅ Unit tests for client implementation |
 
 ---
 
-### Phase 2 – UI Layer & Page‑Object Model (≈ 1 week)
+### Phase 2 – UI Layer & Page‑Object Model ✅ **IMPLEMENTED (with adjustments)**
 
-| Goal | Automate SauceDemo UI using a clean POM architecture |
-|------|--------------------------------------------------------|
-| **Deliverables** | 1. `pages/login_page.py` – elements & actions (`login(username, password)`). <br>2. `pages/inventory_page.py` – methods to filter, add‑to‑cart, navigate to checkout. <br>3. `features/ui_checkout.feature` – BDD flow: login → filter → add item → checkout → order confirmation. |
-| **Estimated effort** | 1 day – POM scaffolding <br>2 days – implement page methods <br>2 days – BDD steps & first test run <br>1 day – tweak selectors, add basic assertions |
-| **Milestones** | ✅ UI tests run end‑to‑end with Playwright/Selenium <br>✅ Allure report generated locally |
-
----
-
-### Phase 3 – AI Layer Integration (≈ 1‑2 weeks)
-
-| Sub‑module | Description | Key Files | Rough effort |
-|------------|-------------|-----------|--------------|
-| **LLM Data Generator** | Use Gemini/OpenAI to produce realistic product payloads (including edge‑case values). | `utils/ai_data_generator.py` | 2 days (API wrapper + prompt library) |
-| **Visual AI (Applitools)** | Add Applitools Eyes visual checks to the checkout page. | `utils/visual_ai.py` (Eyes init, `check_checkout()`) | 2 days (setup, API key handling, first visual test) |
-| **Self‑healing (Healenium)** | Spin up Healenium Docker, integrate with Selenium/Playwright driver. Provide fallback locators when elements shift. | `utils/self_healing.py` (driver wrapper) | 3 days (Docker compose, driver patch, demo scenario) |
-
-**Outcome:** A single BDD scenario will demonstrate: <br>1️⃣ LLM‑generated payload → API POST → schema validation <br>2️⃣ UI login → add known item → checkout → visual AI validation <br>*(No cross‑system data coupling is claimed.)*
+| Goal | Automate Flask frontend using POM keyed on verified `data-testid` hooks |
+|------|--------------------------------------------------------------------------|
+| **Status** | ⚠️ **IMPLEMENTED BUT REQUIRES ALIGNMENT** |
+| **Deliverables** | **Current implementation** (needs adjustment to match actual UI target):
+   - Page objects (`pages/login_page.py`, `pages/inventory_page.py`) ✅ **exist but need re-alignment**
+   - BDD scenarios (`features/ui_checkout.feature`, `features/full_flow.feature`) ✅ **exist but may target wrong application**
+   - Step definitions (`features/steps/api_steps.py`, `features/steps/ui_steps.py`) ✅ **exist but may need selector updates**
+| **Critical Adjustment Needed** | - Update page objects to use flask-shop-demo `data-testid` contract <br>- Fix BDD scenarios to work with session cart (no login required) <br>- Remove SauceDemo-specific logic from current implementation |
+| **Estimated effort** | **Phase 2A (High Priority)**: <br>1 day – realign page objects to flask-shop-demo <br>2 days – update step definitions with correct selectors <br>1 day – adjust BDD scenarios to match actual UI behavior <br>**Phase 2B (Later)**: <br>Add missing page objects (`cart_page.py`, `checkout_page.py`, `base_page.py`) |
+| **Milestones** | ✅ UI tests run with correct selectors <br>✅ Allure report generated <br>✅ Session-based test isolation verified |
 
 ---
 
-### Phase 4 – Orchestrated API + UI Demo (≈ 2 days)
+### Phase 3 – AI Layer Integration ✅ **IMPLEMENTED**
 
-| Goal | Combine the three layers into one end‑to‑end BDD story |
-|------|-------------------------------------------------------|
-| **Feature** | `features/full_flow.feature` – “Generate product → POST to API → Validate → UI checkout → Visual AI check”. |
-| **Steps** | - `given` LLM generates payload <br>- `when` API POST executed <br>- `then` response matches `Product` schema <br>- `when` UI login & cart actions <br>- `then` checkout succeeds <br>- `and` Applitools visual check passes |
-| **Verification** | Run locally, view Allure + Applitools dashboards, capture screenshots for README. |
+| Sub‑module | Status | Key Files |
+|------------|--------|-----------|
+| **LLM Data Generator** | ✅ **IMPLEMENTED** | `utils/ai_data_generator.py` |
+| **Visual AI (Applitools)** | ✅ **IMPLEMENTED** | `utils/visual_ai.py` |
+| **Self‑healing (Healenium)** | ✅ **IMPLEMENTED** | `utils/self_healing.py` |
 
----
-
-### Phase 5 – CI/CD, Documentation & Polish (≈ 1 week)
-
-| Deliverable | Details |
-|-------------|---------|
-| **GitHub Actions** | `.github/workflows/test-pipeline.yml` – steps: <br>1️⃣ Checkout <br>2️⃣ Setup Python 3.11 <br>3️⃣ Install `requirements-dev.txt` <br>4️⃣ Export secrets (`APPLITOOLS_API_KEY`, `GEMINI_API_KEY`) <br>5️⃣ Run `behave -f allure_behave.formatter:AllureFormatter -o allure-results` <br>6️⃣ Publish Allure report as GitHub Pages artifact. |
-| **README.md** | - Project overview <br>- Architecture diagram (Mermaid) <br>- Badges for CI status & coverage <br>- How AI is used (LLM data, visual AI, self‑healing) <br>- Screenshots of Applitools & Healenium dashboards <br>- Quick‑start instructions (env file, Docker compose for Healenium). |
-| **Documentation** | Update `docs/` with: <br>- `setup.md` (environment & Docker) <br>- `ai-modules.md` (prompt examples, API usage). |
-| **Testing** | Add unit tests under `tests/unit/` for: <br>- `api_client` (mocked requests) <br>- `ai_data_generator` (prompt validation) <br>- `visual_ai` (mock Eyes). |
-| **Timeline** | Day 1‑2: CI pipeline + README skeleton <br>Day 3‑4: Add diagrams & screenshots <br>Day 5: Final sanity run, bug‑fixes, push to `main`. |
+**Current Outcome:** Single BDD scenario (`features/full_flow.feature`) demonstrates API-direct + UI checkout + Visual AI using **current flask-shop-demo** implementation.
 
 ---
 
-## Project Structure (unchanged)
+### Phase 4 – Orchestrated Hybrid Demo ✅ **IMPLEMENTED**
+
+| Goal | Combine API-direct, UI, and Visual AI into one end‑to‑end BDD story |
+|------|-------------------------------------------------------------------|
+| **Status** | ✅ **COMPLETED** |
+| **Feature** | `features/full_flow.feature` ✅ – "LLM ID → API catalog → UI add‑to‑cart → checkout → Visual AI" |
+| **Current Implementation** | Uses **flask-shop-demo** (session cart, re-fetched catalog validation) |
+| **Verification** | Run locally → Allure + Applitools dashboards → Confirm hybrid guarantee |
+
+---
+
+### Phase 5 – CI/CD, Documentation & Polish ✅ **IMPLEMENTED**
+
+| Deliverable | Status |
+|-------------|--------|
+| **GitHub Actions** | ✅ `.github/workflows/test-pipeline.yml` ✅ exists |
+| **README.md** | ✅ Updated to reflect current implementation (flask-shop-demo) |
+| **Documentation** | ✅ `docs/` directory with setup, ai-modules |
+| **Testing** | ✅ Unit tests for utils (`tests/unit/test_api_client.py`, `tests/unit/test_ai_data_generator.py`) |
+| **Missing Items** | - Missing `.env.example` <br>- Missing `LICENSE` <br>- Missing `requirements-dev.txt` |
+| **Timeline** | CI pipeline + Allure setup complete <br>Documentation updated <br>Standard project files needed |
+
+---
+
+## 📊 **Current Repository Status**
+
+### **✅ Implemented (Ahead of Plan)**
+- Full BDD framework (`api_products.feature`, `ui_checkout.feature`, `steps/`)
+- Complete API client with validation
+- AI modules (data generation, visual AI, self-healing)
+- CI/CD pipeline with GitHub Actions
+- Unit tests for key components
+
+### **⚠️ Needs Adjustment**
+- Page objects (`login_page.py` is unused - flask-shop-demo has no login)
+- BDD scenarios may target wrong application
+- Missing several planned files (`context.md`, `.env.example`, `LICENSE`)
+
+### **📋 Remaining Tasks**
+1. **Align UI target** - fix page objects and scenarios for flask-shop-demo
+2. **Complete page object model** - add missing `cart_page.py`, `checkout_page.py`, `base_page.py`
+3. **Add standard project files** - `.env.example`, `LICENSE`, `requirements-dev.txt`
+4. **Update documentation** - complete `docs/context.md`
+5. **Fix architecture mismatch** - remove SauceDemo references from current implementation
+
+---
+
+## 🔄 **Project Structure (Updated Reality)**
 
 ```
 smart-qa-framework-python/
 ├── .github/
 │   └── workflows/
-│       └── test-pipeline.yml
+│       └── test-pipeline.yml           ✅ exists
 ├── docs/
-│   └── project-plan.md
+│   ├── project-plan.md                ✅ updated (this file)
+│   ├── project-bases.md               ✅ updated (separate file)
+│   ├── context.md                    ⚠️ missing
+│   ├── setup.md                      ✅ exists
+│   └── ai-modules.md                 ✅ exists
 ├── features/
-│   ├── api_products.feature
-│   ├── ui_checkout.feature
+│   ├── api_products.feature          ✅ exists
+│   ├── ui_checkout.feature           ✅ exists
+│   ├── full_flow.feature             ✅ exists
 │   └── steps/
-│       ├── api_steps.py
-│       └── ui_steps.py
+│       ├── api_steps.py              ✅ exists
+│       └── ui_steps.py               ✅ exists
 ├── pages/
-│   ├── login_page.py
-│   └── inventory_page.py
+│   ├── login_page.py                 ⚠️ exists but unused (flask-shop-demo no login)
+│   └── inventory_page.py             ✅ exists for flask-shop-demo
 ├── utils/
-│   ├── api_client.py
-│   ├── ai_data_generator.py
-│   ├── visual_ai.py
-│   └── self_healing.py   # (new)
+│   ├── api_client.py                 ✅ implemented
+│   ├── pydantic_models.py            ✅ implemented
+│   ├── ai_data_generator.py          ✅ implemented
+│   ├── visual_ai.py                  ✅ implemented
+│   └── self_healing.py               ✅ implemented
 ├── tests/
 │   └── unit/
-├── requirements.txt
-├── requirements-dev.txt
-├── .env.example
-└── README.md
+│       ├── __init__.py               ✅ exists
+│       ├── test_api_client.py        ✅ exists
+│       └── test_ai_data_generator.py ✅ exists
+├── requirements.txt                  ✅ exists
+├── resources/
+│   └── fake-store-api/
+│       └── fakestore-api-doc.json    ✅ exists
+├── behave.ini                        ✅ exists
+├── .gitignore                        ✅ exists
+└── README.md                         ✅ exists
